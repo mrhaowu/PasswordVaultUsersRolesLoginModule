@@ -1,5 +1,5 @@
 # PasswordVaultUsersRolesLoginModule
-A JAAS login module that uses the JBoss password vault for the passwords.  This version is specifically for JBoss EAP 6.1.0.
+A JAAS login module that uses the JBoss password vault for the passwords.  This version is specifically for JBoss EAP 6.1.0.  This login module is based on the built-in UsersRolesLoginModule.  See https://access.redhat.com/documentation/en-US/JBoss_Enterprise_Application_Platform/6.1/html-single/Administration_and_Configuration_Guide/#topic4732_usersroles for configuration details.
 
 To use, add the JAR as a module in JBoss EAP 6.1.0.
 
@@ -48,5 +48,11 @@ In the same configuration file, add a security-domain in the security subsystem,
                 </security-domain>
 ```
 See https://access.redhat.com/documentation/en-US/JBoss_Enterprise_Application_Platform/6.1/html-single/Administration_and_Configuration_Guide/#sect-Password_Vaults_for_Sensitive_Strings on how to create a password vault.
+
+The rolesProperties file is the same as UsersRolesLoginModule but in the usersProperties file, the password will be in the form of a vault password like the following:
+
+```
+myuser=VAULT::Passwords::MyUserPassword::ODM3MjAyOWUtNWI3MC00YjQ0LThjNGQtZTZmMmYzZDFhYTUzTElORV9CUkVBS3ZhdWx0
+```
 
 
