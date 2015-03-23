@@ -49,6 +49,8 @@ In the same configuration file, add a security-domain in the security subsystem,
 ```
 See https://access.redhat.com/documentation/en-US/JBoss_Enterprise_Application_Platform/6.1/html-single/Administration_and_Configuration_Guide/#sect-Password_Vaults_for_Sensitive_Strings on how to create a password vault.
 
+<b>NOTE: If the <module-option> for the vault properties are missing, then the login module will use the already initialized vault defined in the <vault> section.</b>
+
 The rolesProperties file is the same as UsersRolesLoginModule but in the usersProperties file, the password will be in the form of a vault password like the following:
 
 ```
