@@ -12,6 +12,7 @@ import org.jboss.logging.Logger;
 import org.jboss.security.auth.spi.UsersRolesLoginModule;
 import org.jboss.security.util.StringPropertyReplacer;
 import org.jboss.security.vault.SecurityVault;
+import org.jboss.security.vault.SecurityVaultException;
 import org.jboss.security.vault.SecurityVaultFactory;
 import org.picketbox.plugins.vault.PicketBoxSecurityVault;
 
@@ -88,27 +89,49 @@ public class PasswordVaultUsersRolesLoginModule extends UsersRolesLoginModule {
 
     private SecurityVault initVault() throws Exception {
         SecurityVault vault = SecurityVaultFactory.get();
-        Map<String, Object> options = new HashMap<>();
-        options.put(PicketBoxSecurityVault.ENC_FILE_DIR, encFileDir);
-        options.put(PicketBoxSecurityVault.KEYSTORE_URL, keystoreUrl);
-        options.put(PicketBoxSecurityVault.KEYSTORE_ALIAS, keystoreAlias);
-        options.put(PicketBoxSecurityVault.ITERATION_COUNT, iterationCount);
-        options.put(PicketBoxSecurityVault.SALT, salt);
-        options.put(PicketBoxSecurityVault.KEYSTORE_PASSWORD, keystorePassword);
-        vault.init(options);
+        if (areVaultPropertiesDefined()) {
+            // vault params are defined so we use this vault
+            Map<String, Object> options = new HashMap<>();
+            options.put(PicketBoxSecurityVault.ENC_FILE_DIR, encFileDir);
+            options.put(PicketBoxSecurityVault.KEYSTORE_URL, keystoreUrl);
+            options.put(PicketBoxSecurityVault.KEYSTORE_ALIAS, keystoreAlias);
+            options.put(PicketBoxSecurityVault.ITERATION_COUNT, iterationCount);
+            options.put(PicketBoxSecurityVault.SALT, salt);
+            options.put(PicketBoxSecurityVault.KEYSTORE_PASSWORD, keystorePassword);
+            vault.init(options);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Password Vault initialized");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Password Vault initialized");
+            }
+        }
+        else if (vault != null && vault.isInitialized()) {
+            // vault is already initialized
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Security vault is already initialized");
+            }
+        }
+        else {
+            throw new SecurityVaultException(
+                    "No instance of vault can be found.  Either define a <vault> section in the configuration or define <module-option> for all vault properties in the login module");
         }
 
         return vault;
     }
 
+    private boolean areVaultPropertiesDefined() {
+        return !isEmptyString(encFileDir) && !isEmptyString(iterationCount) && !isEmptyString(keystoreAlias) && !isEmptyString(keystorePassword)
+                && !isEmptyString(keystoreUrl) && !isEmptyString(salt);
+    }
+
     private String getProperty(Map<String, ?> options, String property) {
         String option = (String) options.get(property);
-        if (options != null) {
+        if (!isEmptyString(option)) {
             return StringPropertyReplacer.replaceProperties(option);
         }
         return "";
+    }
+
+    private static boolean isEmptyString(String string) {
+        return string == null || string.trim().equals("");
     }
 }
